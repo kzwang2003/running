@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="top">
+
+    <GridLayout
+        android:id="@+id/achievement_grid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="3"
+        android:padding="16dp"
+        android:alignmentMode="alignMargins"
+        android:rowOrderPreserved="false">
+
+        <TextView
+            android:id="@+id/achievement_1000m"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:background="@drawable/achievement_background"
+            android:text="1000 米"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_margin="8dp"
+            android:padding="16dp" />
+
+        <TextView
+            android:id="@+id/achievement_5000m"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:background="@drawable/achievement_background"
+            android:text="5000 米"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_margin="8dp"
+            android:padding="16dp" />
+
+        <TextView
+            android:id="@+id/achievement_10000m"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:background="@drawable/achievement_background"
+            android:text="10000 米"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_margin="8dp"
+            android:padding="16dp" />
+
+    </GridLayout>
+
+</LinearLayout>
