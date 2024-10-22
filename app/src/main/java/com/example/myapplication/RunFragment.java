@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
+import com.amap.api.maps.MapsInitializer;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.PolylineOptions;
@@ -24,10 +25,10 @@ import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
+import com.amap.api.maps.model.MyLocationStyle;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -50,6 +51,28 @@ public class RunFragment extends Fragment implements AMapLocationListener {
         mapView = view.findViewById(R.id.map_view);
         mapView.onCreate(savedInstanceState);
 
+        // 初始化aMap对象
+        if (aMap == null) {
+            aMap = mapView.getMap();
+        }
+
+        // 设置定位样式
+        MyLocationStyle myLocationStyle = new MyLocationStyle();
+        myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE);
+        myLocationStyle.interval(2000); // 每2秒定位一次
+        aMap.moveCamera(CameraUpdateFactory.zoomTo(18));
+
+        aMap.setMyLocationStyle(myLocationStyle);
+
+
+        // 设置地图加载监听
+        aMap.setOnMapLoadedListener(() -> {
+            Toast.makeText(getContext(), "地图加载成功", Toast.LENGTH_SHORT).show();
+
+        });
+
+        aMap.setMyLocationEnabled(true); // 启用定位图层
+
         startButton = view.findViewById(R.id.start_button);
         timeTextView = view.findViewById(R.id.time_text_view);
         distanceTextView = view.findViewById(R.id.distance_text_view);
@@ -68,6 +91,7 @@ public class RunFragment extends Fragment implements AMapLocationListener {
 
         return view;
     }
+
 
     private void startTracking() {
         try {
@@ -98,41 +122,12 @@ public class RunFragment extends Fragment implements AMapLocationListener {
         }
     }
 
-    private void checkAchievements(double distance) {
-        SharedPreferences sharedPreferences = getContext().getSharedPreferences("Achievements", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        if (distance >= 1000 && !sharedPreferences.getBoolean("achievement_1000m", false)) {
-            editor.putBoolean("achievement_1000m", true);
-            Toast.makeText(getContext(), "恭喜！完成单次运动1000米成就！", Toast.LENGTH_SHORT).show();
-        }
-
-        if (distance >= 5000 && !sharedPreferences.getBoolean("achievement_5000m", false)) {
-            editor.putBoolean("achievement_5000m", true);
-            Toast.makeText(getContext(), "恭喜！完成单次运动5000米成就！", Toast.LENGTH_SHORT).show();
-        }
-
-        if (distance >= 10000 && !sharedPreferences.getBoolean("achievement_10000m", false)) {
-            editor.putBoolean("achievement_10000m", true);
-            Toast.makeText(getContext(), "恭喜！完成单次运动10000米成就！", Toast.LENGTH_SHORT).show();
-        }
-
-        editor.apply();
-    }
-
-
 
     private void stopTracking() {
         isTracking = false;
         startButton.setText("开始跑步");
         locationClient.stopLocation();
         handler.removeCallbacks(updateRunnable);
-
-        double distance = calculateDistance(); // 单位：米
-        long elapsedTime = System.currentTimeMillis() - startTime; // 单位：毫秒
-
-        // 检查成就
-        checkAchievements(distance);
 
         Toast.makeText(getContext(), "停止运动记录", Toast.LENGTH_SHORT).show();
     }
@@ -145,7 +140,7 @@ public class RunFragment extends Fragment implements AMapLocationListener {
                 timeTextView.setText("时间: " + formatTime(elapsedTime));
                 double distance = calculateDistance();
                 distanceTextView.setText("距离: " + String.format("%.2f", distance) + " 米");
-                speedTextView.setText("速度: " + calculateSpeed(elapsedTime, distance) + " 分钟/公里"); // 显示速度
+                speedTextView.setText("速度: " + calculateSpeed(elapsedTime, distance) + " 分钟/千米"); // 显示速度
                 handler.postDelayed(this, 1000);
             }
         }
@@ -174,10 +169,10 @@ public class RunFragment extends Fragment implements AMapLocationListener {
 
     private String calculateSpeed(long elapsedTime, double distance) {
         if (distance == 0) return "N/A";
-        double distanceInKm = distance / 1000; // 转换为公里
+        double distanceInKm = distance / 1000; // 转换为千米
         double timeInHours = elapsedTime / 3600000.0; // 转换为小时
-        double speed = timeInHours / distanceInKm; // 速度（小时/公里）
-        return String.format("%.2f", speed * 60); // 转换为分钟/公里并保留两位小数
+        double speed = timeInHours / distanceInKm; // 速度（小时/千米）
+        return String.format("%.2f", speed * 60); // 转换为分钟/千米并保留两位小数
     }
 
     @Override
@@ -190,8 +185,10 @@ public class RunFragment extends Fragment implements AMapLocationListener {
             polylineOptions.add(latLng);
             aMap.addPolyline(polylineOptions);
 
-            aMap.addMarker(new MarkerOptions().position(latLng).title("当前位置"));
-            aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+            //aMap.addMarker(new MarkerOptions().position(latLng).title("当前位置"));
+            float currentZoom = aMap.getCameraPosition().zoom;
+            aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, currentZoom));
+
         } else {
             Toast.makeText(getContext(), "定位失败: " + location.getErrorInfo(), Toast.LENGTH_SHORT).show();
         }

@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.addTab(tabLayout.newTab().setText("运动"));
         tabLayout.addTab(tabLayout.newTab().setText("成就"));
 
-        // 默认加载成就界面
+        // 默认加载界面
         loadFragment(new RunFragment());
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
